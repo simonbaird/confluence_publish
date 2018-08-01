@@ -1,0 +1,39 @@
+#!/usr/bin/python
+#
+# Example usage:
+#
+#   python confluence-publish \
+#     --jira=https://docs.engineering.redhat.com \
+#     --space-key=SOMEKEY \
+#     --page-title="My Page Title" \
+#     --content=path/to/newcontent.html
+#
+
+import argparse
+from confluence_publish import ConfluenceSession, ConfluencePage
+
+def get_opts():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--jira',       type=str, help='URL to JIRA instance, e.g. https://jira.example.com')
+    parser.add_argument('--space-key',  type=str, help='The space key where the page is located in Confluence')
+    parser.add_argument('--page-title', type=str, help='The name of the page you want to update')
+    parser.add_argument('--content',    type=str, help='Path to file containing new page contents')
+    return parser.parse_args()
+
+def init_session(jira):
+    ConfluenceSession(opts.jira)
+
+def get_page(space_key, page_title):
+    return ConfluencePage(space_key=space_key, page_title=page_title)
+
+def update_page(space_key, page_title, new_content):
+    page = get_page(space_key, page_title)
+    page.update_page_body(new_content)
+
+def read_content(content_path):
+    return open(content_path, 'r').read()
+
+opts = get_opts()
+init_session(opts.jira)
+new_content = read_content(opts.content)
+update_page(opts.space_key, opts.page_title, new_content)
