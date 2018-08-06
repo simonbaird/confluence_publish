@@ -1,0 +1,79 @@
+#!/usr/bin/python
+#
+# This is simliar to confluence-publish except
+# there's a sanity check to ensure the page your
+# updating is a child page of a particular page.
+#
+# Also it supports using the page-id to specify
+# which page you're updating. If the update includes
+# a title change, then this is required.
+#
+# Example usage:
+#
+#   python confluence-update-child \
+#     --jira=https://docs.engineering.redhat.com \
+#     --space=SOMEKEY \
+#     --page="My Page Title" \
+#     --parent="My Parent" \
+#     --content=path/to/newcontent.html
+#
+
+import argparse
+from confluence_publish import ConfluenceSession, ConfluencePage
+
+def get_opts():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--jira',           type=str, help='URL to JIRA instance, e.g. https://jira.example.com')
+    parser.add_argument('--space-key',      type=str, help='The space key where the page is located in Confluence')
+    parser.add_argument('--page-title',     type=str, help='The name of the page you want to update')
+    parser.add_argument('--page-id',        type=str, help='The id of the page you want to update')
+    parser.add_argument('--parent-page',    type=str, help='The name of the parent page of the page you want to update.')
+    parser.add_argument('--content',        type=str, help='Path to file containing new page contents')
+    return parser.parse_args()
+
+def init_session(jira):
+    ConfluenceSession(opts.jira)
+
+def get_page(space_key, page_title):
+    return ConfluencePage(space_key=space_key, page_title=page_title)
+
+def read_content(content_path):
+    return open(content_path, 'r').read()
+
+opts = get_opts()
+init_session(opts.jira)
+parent_page = get_page(opts.space_key, opts.parent_page)
+child_pages = parent_page.get_child_pages()
+
+page_to_update = None
+
+# Look for a child page that matches the specified id
+for page in child_pages:
+    if opts.page_id == page.page_id:
+        page_to_update = page
+
+# Exit if page id was specified, but not found
+if opts.page_id and page_to_update == None:
+    print("Page not found with that id!")
+    sys.exit()
+
+# If we didn't find a patch when searcing by page id,
+# now look for a page with a matching title
+if page_to_update == None:
+    for page in child_pages:
+        if opts.page_title == page.page_title:
+            print("Found matching title")
+            page_to_update = page
+
+# Still no matching page.
+# Suggest that user specified page id, show a list of pages with ids, then exit.
+if page_to_update == None:
+    print("Didn't find a matching page. Please specify a page-id explicitly from the following list.")
+    for page in child_pages:
+        print(page)
+    sys.exit()
+
+# We found a page we can update so go ahead and update it
+new_content = read_content(opts.content)
+page_to_update.update_page_body(new_content, opts.page_title)
+print("Updated {}".format(page_to_update))
