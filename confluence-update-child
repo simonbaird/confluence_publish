@@ -11,7 +11,7 @@
 # Example usage:
 #
 #   python confluence-update-child \
-#     --jira=https://docs.engineering.redhat.com \
+#     --confluence=https://docs.engineering.redhat.com \
 #     --space=SOMEKEY \
 #     --page="My Page Title" \
 #     --parent="My Parent" \
@@ -23,7 +23,7 @@ from confluence_publish import ConfluenceSession, ConfluencePage
 
 def get_opts():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--jira',           type=str, help='URL to JIRA instance, e.g. https://jira.example.com')
+    parser.add_argument('--confluence',     type=str, help='URL to Confluence instance, e.g. https://confluence.example.com')
     parser.add_argument('--space-key',      type=str, help='The space key where the page is located in Confluence')
     parser.add_argument('--page-title',     type=str, help='The name of the page you want to update')
     parser.add_argument('--page-id',        type=str, help='The id of the page you want to update')
@@ -31,8 +31,8 @@ def get_opts():
     parser.add_argument('--content',        type=str, help='Path to file containing new page contents')
     return parser.parse_args()
 
-def init_session(jira):
-    ConfluenceSession(opts.jira)
+def init_session(confluence_url):
+    ConfluenceSession(confluence_url)
 
 def get_page(space_key, page_title):
     return ConfluencePage(space_key=space_key, page_title=page_title)
@@ -41,7 +41,7 @@ def read_content(content_path):
     return open(content_path, 'r').read()
 
 opts = get_opts()
-init_session(opts.jira)
+init_session(opts.confluence)
 parent_page = get_page(opts.space_key, opts.parent_page)
 child_pages = parent_page.get_child_pages()
 

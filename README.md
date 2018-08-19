@@ -30,7 +30,7 @@ As a command line tool:
 
 ````
 ./confluence-publish \
-  --jira=https://docs.engineering.redhat.com \
+  --confluence=https://confluence.example.com \
   --space-key=SOMEKEY \
   --page-title="My Page Title" \
   --content=path/to/newcontent.html
