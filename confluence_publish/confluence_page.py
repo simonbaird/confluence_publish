@@ -65,8 +65,8 @@ class ConfluencePage:
             "body": { "storage": { "value": new_body_content, "representation": "storage" } },
             "version": { "number": self.page_version + 1 }
         })
+        #print(response.text)
         response.raise_for_status()
-        #print response.text
 
     def __str__(self):
         return "{} (ver {}) '{}'".format(self.page_id, self.page_version, self.page_title)

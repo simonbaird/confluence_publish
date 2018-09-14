@@ -24,8 +24,10 @@ class ConfluenceSession:
     def _login(self):
         # Auth with kerberos. An auth cookie will be saved in the session.
         self.session = requests.Session()
-        self.session.get(self._full_url("/step-auth-gss"),
+        response = self.session.get(self._full_url("/step-auth-gss"),
             auth = HTTPKerberosAuth(mutual_authentication='DISABLED'))
+        #print(response.text)
+        response.raise_for_status()
 
     def _full_url(self, url):
         return self.confluence_url + url
